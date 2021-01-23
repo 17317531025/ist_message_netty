@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+
+    <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
+        <property name="autoDelimitKeywords" value="true"/>
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true"/>
+            <property name="addRemarkComments" value="true"/>
+        </commentGenerator>
+        <jdbcConnection
+                driverClass="com.mysql.cj.jdbc.Driver"
+                connectionURL="jdbc:mysql://101.132.114.214:3306/card"
+                userId="root"
+                password="uAiqwVwjJ8-i">
+        </jdbcConnection>
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+        <javaModelGenerator targetPackage="com.ist.message.domain" targetProject="./src/main/java">
+            <property name="enableSubPackages" value="false"/>
+            <property name="constructorBased" value="false"/>
+            <property name="trimStrings" value="true"/>
+            <property name="immutable" value="false"/>
+        </javaModelGenerator>
+        <sqlMapGenerator targetPackage="mapper" targetProject="./src/main/resources">
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.ist.message.dao" targetProject="./src/main/java">
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <!--<table tableName="MSG_GROUP" domainObjectName="MsgGroup">
+            <generatedKey column="groupid" sqlStatement="MySQL" type="post" identity="true"/>
+        </table>-->
+<!--        <table tableName="MSG_MEMBER" domainObjectName="MsgMember">-->
+<!--            <generatedKey column="memberId" sqlStatement="MySQL" type="post" identity="true"/>-->
+<!--        </table>-->
+<!--        <table tableName="MSG" domainObjectName="Msg">-->
+<!--            <generatedKey column="timeId" sqlStatement="MySQL" type="post" identity="true"/>-->
+<!--        </table>-->
+        <table tableName="USER_FRIEND" domainObjectName="UserFriend">
+            <generatedKey column="id" sqlStatement="MySQL" type="post" identity="true"/>
+        </table>
+    </context>
+</generatorConfiguration>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script type="text/javascript" th:inline="javascript">
+        /*<![CDATA[*/
+        ctxPath = /*[[@{/}]]*/'';
+        /*]]>*/
+        var socket;
+        function openSocket() {
+            if(typeof(WebSocket) == "undefined") {
+                console.log("您的浏览器不支持WebSocket");
+            }else{
+                console.log("您的浏览器支持WebSocket");
+                //实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+                //等同于socket = new WebSocket("ws://localhost:8888/xxxx/im/25");
+                //var socketUrl="${request.contextPath}/im/"+$("#userId").val();
+                //var socketUrl="https://brofarm.cn/ist_im/imserver/"+document.socketSendMsgForm.sendId.value+"/1";
+                var socketUrl="http://127.0.0.1:58080/imServer";
+                socketUrl=socketUrl.replace("https","wss").replace("http","ws");
+                console.log(socketUrl);
+                if(socket!=null){
+                    socket.close();
+                    socket=null;
+                }
+                socket = new WebSocket(socketUrl);
+                //打开事件
+                socket.onopen = function() {
+                    console.log("websocket已打开");
+                    socket.send(
+                        JSON.stringify({
+                            // 连接成功将，用户ID传给服务端
+                            status:'09',
+                            type:"00",
+                            uid: document.socketSendMsgForm.sendId.value
+                        })
+                    );
+                    //socket.send("这是来自客户端的消息" + location.href + new Date());
+                };
+                //获得消息事件
+                socket.onmessage = function(msg) {
+                    console.log(msg.data);
+                    //发现消息进入    开始处理前端触发逻辑
+                };
+                //关闭事件
+                socket.onclose = function() {
+                    console.log("websocket已关闭");
+                };
+                //发生了错误事件
+                socket.onerror = function() {
+                    console.log("websocket发生了错误");
+                }
+            }
+        }
+        function sendMessage() {
+            if(typeof(WebSocket) == "undefined") {
+                console.log("您的浏览器不支持WebSocket");
+            }else {
+                //String message = "{status:01,type:01,len:0020,receiverId:[300000000001
+                console.log("您的浏览器支持WebSocket");//document.socketSendMsgForm.windowId.value sender
+                console.log('{"status":"01","type":"01","len":"0001","receiverId":['+document.socketSendMsgForm.receiverId.value+'],"content":"'+document.socketSendMsgForm.contentText.value+'","sender":"'+document.socketSendMsgForm.sendId.value+'","msgType":"'+document.socketSendMsgForm.msgType.value+'","contentType":"'+document.socketSendMsgForm.contentType.value+'","no":"'+document.socketSendMsgForm.no.value+'","senderName":"'+document.socketSendMsgForm.senderName.value+'","talker":"'+document.socketSendMsgForm.receiverId.value+'"}');
+                socket.send('{"status":"01","type":"01","len":"0001","receiverId":['+document.socketSendMsgForm.receiverId.value+'],"content":"'+document.socketSendMsgForm.contentText.value+'","sender":"'+document.socketSendMsgForm.sendId.value+'","msgType":"'+document.socketSendMsgForm.msgType.value+'","contentType":"'+document.socketSendMsgForm.contentType.value+'","no":"'+document.socketSendMsgForm.no.value+'","senderName":"'+document.socketSendMsgForm.senderName.value+'","talker":"'+document.socketSendMsgForm.receiverId.value+'"}');
+                //socket.send('{"receiverId":"2","type":"1","data":[{"content":"test","sender":"1","msgType":1,"contentType":1,"no":1,"senderName":"test1","talker":"2"}]}');
+            }
+        }
+    </script>
+    <script type="text/javascript" th:src="@{/js/md5.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+    <title>接口测试页</title>
+</head>
+<body>
+<form name="socketSendMsgForm">
+    <p>【receiverId】：<div><input id="receiverId" name="receiverId" type="text" value="100000000001"></div>
+    <p>【content】：<div><input id="contentText" name="contentText" type="text" value="hello websocket"></div>
+    <p>【msgType】：<div><input id="msgType" name="msgType" type="text" value="1"></div>
+    <p>【contentType】：<div><input id="contentType" name="contentType" type="text" value="1"></div>
+    <p>【senderName】：<div><input id="senderName" name="senderName" type="text" value="世纪风"></div>
+    <p>【sender】：<div><input id="sendId" name="sendId" type="text" value="100000000000"></div>
+    <p>【no】：<div><input id="no" name="no" type="text" value="1"></div>
+    <p>【操作】：<div><a onclick="openSocket()">开启socket</a></div>
+    <p>【操作】：<div><a onclick="sendMessage()">发送消息</a></div>
+</form>
+<br></br>
+<form th:action="@{/createGroup}" method="post" name="createGroupForm" id="createGroupForm">
+    <table border="1">
+        <tr align="center">
+            <td colspan="2">创建分组</td>
+        </tr>
+        <tr>
+            <td>操作人</td>
+            <td><input type="text" name="optUserId" value="200000000102"></input></td>
+        </tr>
+        <tr>
+            <td>组名</td>
+            <td><input type="text" name="groupName" value=""></input></td>
+        </tr>
+        <tr>
+            <td>进群方式</td>
+            <td>
+                <select name="joinGroup">
+                    <option value="1" selected="selected">免确认</option>
+                    <option value="2" >需管理员确</option>
+                </select>*
+            </td>
+        </tr>
+        <tr>
+            <td>头像地址</td>
+            <td><input type="text" name="avatarUrl" value=""></input></td>
+        </tr>
+        <tr>
+            <td>应用编号</td>
+            <td><input type="text" name="appId" value="20191030001"></input>*</td>
+        </tr>
+        <tr align="center">
+            <td colspan="2">
+                <input type="hidden" name="time" id="createGroupTime"></input>
+                <input type="hidden" name="sign" id="createGroupSign"></input>
+                <input type="button" name="提交" value="提交" onclick="createGroup();"></input>
+            </td>
+        </tr>
+    </table>
+</form>
+<br></br>
+<form th:action="@{/addGroup}" method="post" name="addGroupForm" id="addGroupForm">
+    <table border="1">
+        <tr align="center">
+            <td colspan="2">添加分组</td>
+        </tr>
+        <tr>
+            <td>群主id</td>
+            <td><input type="text" name="groupId" value=""></input></td>
+        </tr>
+        <tr>
+            <td>邀请者</td>
+            <td><input type="text" name="inviteUserId" value="200000000101"></input></td>
+        </tr>
+        <tr>
+            <td>被邀请者</td>
+            <td><input type="text" name="talker" value="200000000102"></input></td>
+        </tr>
+        <tr>
+            <td>应用编号</td>
+            <td><input type="text" name="appId" value="20191030001"></input>*</td>
+        </tr>
+        <tr align="center">
+            <td colspan="2">
+                <input type="hidden" name="time" id="addGroupTime"></input>
+                <input type="hidden" name="sign" id="addGroupSign"></input>
+                <input type="button" name="提交" value="提交" onclick="addGroup();"></input>
+            </td>
+        </tr>
+    </table>
+</form>
+<br></br>
+<form th:action="@{/getGroupInfobyIds}" method="post" name="getGroupInfobyIdsForm" id="getGroupInfobyIdsForm">
+    <table border="1">
+        <tr align="center">
+            <td colspan="2">查询群基本信息</td>
+        </tr>
+        <tr>
+            <td>群主id</td>
+            <td><input type="text" name="groupIds" value=""></input></td>
+        </tr>
+        <tr>
+            <td>登录令牌</td>
+            <td><input type="text" name="tokenId" value=""></input></td>
+        </tr>
+        <tr>
+            <td>用户id</td>
+            <td><input type="text" name="userId" value="200000000102"></input></td>
+        </tr>
+        <tr>
+            <td>应用编号</td>
+            <td><input type="text" name="appId" value="20191030001"></input>*</td>
+        </tr>
+        <tr align="center">
+            <td colspan="2">
+                <input type="hidden" name="time" id="getGroupInfobyIdsTime"></input>
+                <input type="hidden" name="sign" id="getGroupInfobyIdsSign"></input>
+                <input type="button" name="提交" value="提交" onclick="getGroupInfobyIds();"></input>
+            </td>
+        </tr>
+    </table>
+</form>
+<br></br>
+<script type="text/javascript" th:inline="javascript">
+    function getAppIdSecret(appId){
+        var ser;
+        $.ajax({
+            type: "POST",
+            url: ctxPath+"getAppIdSecret" ,
+            dataType:'text',
+            data: {appId:appId},
+            async:false,
+            success: function (result) {
+                ser = result;
+            },
+            error : function() {
+                alert("appId不存在");
+            }
+        });
+        return ser;
+    }
+    function createGroup(){
+        //debugger;
+        /*<![CDATA[*/
+        var time = /*[[${#dates.format(new java.util.Date().getTime(), 'yyyyMMddHHmmss')}]]*/ '';
+        /*]]>*/
+        var str="avatarUrl" + document.createGroupForm.avatarUrl.value + "&groupName="+document.createGroupForm.groupName.value+"&joinGroup="+document.createGroupForm.joinGroup.value+"&optUserId="+document.createGroupForm.optUserId.value+"&appId="+document.createGroupForm.appId.value+"&time="+time;
+        var ser = getAppIdSecret($.trim(document.createGroupForm.appId.value));
+        if(ser){
+            str=str+ser;
+        }else{
+            return;
+        }
+        debugger;
+        console.log(str)
+        var sign=hex_md5(str);
+        document.getElementById('createGroupSign').value=sign;
+        document.getElementById('createGroupTime').value=time;
+        document.createGroupForm.submit();
+    }
+    function addGroup(){
+        //debugger;
+        /*<![CDATA[*/
+        var time = /*[[${#dates.format(new java.util.Date().getTime(), 'yyyyMMddHHmmss')}]]*/ '';
+        /*]]>*/
+        var str="groupId" + document.addGroupForm.groupId.value + "&inviteUserId="+document.addGroupForm.inviteUserId.value+"&talker="+document.addGroupForm.talker.value+"&appId="+document.addGroupForm.appId.value+"&time="+time;
+        var ser = getAppIdSecret($.trim(document.addGroupForm.appId.value));
+        if(ser){
+            str=str+ser;
+        }else{
+            return;
+        }
+        debugger;
+        console.log(str)
+        var sign=hex_md5(str);
+        document.getElementById('addGroupSign').value=sign;
+        document.getElementById('addGroupTime').value=time;
+        document.addGroupForm.submit();
+    }
+    function getGroupInfobyIds(){
+        //debugger;
+        /*<![CDATA[*/
+        var time = /*[[${#dates.format(new java.util.Date().getTime(), 'yyyyMMddHHmmss')}]]*/ '';
+        /*]]>*/
+        var str="groupIds" + document.getGroupInfobyIdsForm.groupIds.value + "&tokenId="+document.getGroupInfobyIdsForm.tokenId.value+"&appId="+document.getGroupInfobyIdsForm.appId.value+"&time="+time;
+        var ser = getAppIdSecret($.trim(document.getGroupInfobyIdsForm.appId.value));
+        if(ser){
+            str=str+ser;
+        }else{
+            return;
+        }
+        debugger;
+        console.log(str)
+        var sign=hex_md5(str);
+        document.getElementById('getGroupInfobyIdsSign').value=sign;
+        document.getElementById('getGroupInfobyIdsTime').value=time;
+        document.getGroupInfobyIdsForm.submit();
+    }
+</script>
+</body>
+</html>
