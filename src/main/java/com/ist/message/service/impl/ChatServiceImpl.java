@@ -9,7 +9,6 @@ import com.ist.message.common.util.DateUtil;
 import com.ist.message.common.util.RedisKeyUtil;
 import com.ist.message.common.util.RedisUtil;
 import com.ist.message.config.IstConfig;
-import com.ist.message.config.IstEnum;
 import com.ist.message.config.MessageEnum;
 import com.ist.message.config.NettyConfig;
 import com.ist.message.config.kafka.MsgData;
@@ -19,6 +18,7 @@ import com.ist.message.domain.Msg;
 import com.ist.message.domain.MsgExample;
 import com.ist.message.domain.UserFriend;
 import com.ist.message.domain.dto.Response;
+import com.ist.message.push.PushApi;
 import com.ist.message.service.ChatService;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -29,6 +29,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,8 @@ public class ChatServiceImpl extends BaseServiceImpl implements ChatService, App
     private IstConfig istConfig;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private PushApi pushApi;
 
     private int isKafka = 0;
     @Override
@@ -561,6 +564,17 @@ public class ChatServiceImpl extends BaseServiceImpl implements ChatService, App
                 channelTo.writeAndFlush(new TextWebSocketFrame(message));
             } else {
                 logger.warn("urlReceiveMsg " + message + "不存在");
+                //推送服务
+                //调svc服务获取cid
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("userId",receiverId);
+                ResponseEntity<String> stringResponseEntity = restTemplate.postForEntity(istConfig.getIstSvcUrl()+ CodeConstant.IstSvc.USER_QUERY_CLIENT_ID, jsonObject, String.class);
+                String body = stringResponseEntity.getBody();
+                JSONObject bodyJsonObject = JSONObject.parseObject(body);
+                if (ResultConstant.SUCCESS_CODE.equals(bodyJsonObject.getString("code")) && StringUtils.isNotBlank(bodyJsonObject.getString("data"))){
+                    String clientId = bodyJsonObject.getString("data");
+                    pushApi.push(clientId,1);
+                }
                 return Response.fail(ResultConstant.SOCKET_USER_NOT_EXIST_CURRENT_NODE_MSG);
             }
         }catch (Exception e){

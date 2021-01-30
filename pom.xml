@@ -222,6 +222,12 @@
 			<artifactId>springfox-swagger2</artifactId>
 			<version>${swagger2.version}</version>
 		</dependency>
+		<!--  个推   -->
+		<dependency>
+			<groupId>com.getui.push</groupId>
+			<artifactId>restful-sdk</artifactId>
+			<version>1.0.0.0</version>
+		</dependency>
 		<!-- swagger-ui -->
 		<dependency>
 			<groupId>io.springfox</groupId>
