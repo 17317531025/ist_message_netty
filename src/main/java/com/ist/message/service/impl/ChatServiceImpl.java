@@ -224,7 +224,7 @@ public class ChatServiceImpl extends BaseServiceImpl implements ChatService, App
                         String uid = jsonObject.getString("uid");
                         if (StringUtils.isNoneBlank(uid)){
                             Channel channelMap = NettyConfig.getUserChannelMap().get(uid);
-                            if (channelMap!=null){
+                            if (channelMap!=null && channelMap.id().asLongText()!=channel.id().asLongText()){
                                 channelMap.writeAndFlush(new TextWebSocketFrame("offline"));
                                 channelMap.close();
                             }
